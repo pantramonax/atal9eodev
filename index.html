@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ATAL 9/E - Ödev Panosu</title>
+  <style>
+    :root{--bg:#0f1724;--card:#0b1220;--accent:#06b6d4;--muted:#94a3b8;--glass: rgba(255,255,255,0.03)}
+    *{box-sizing:border-box}
+    body{font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; margin:0; background:linear-gradient(180deg,#071026 0%, #071a2b 60%); color:#e6eef6; -webkit-font-smoothing:antialiased}
+    .wrap{max-width:1100px;margin:28px auto;padding:18px}
+    header{display:flex;align-items:center;gap:16px;margin-bottom:18px}
+    .logo{width:64px;height:64px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#60a5fa);display:flex;align-items:center;justify-content:center;font-weight:700;color:#072033;font-size:18px;box-shadow:0 6px 20px rgba(2,6,23,0.6)}
+    h1{margin:0;font-size:20px}
+    p.lead{margin:0;color:var(--muted);font-size:13px}
+
+    .board{display:grid;grid-template-columns:1fr 320px;gap:18px}
+    @media (max-width:900px){.board{grid-template-columns:1fr} .sidebar{order:2}}
+
+    .days{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    @media (max-width:700px){.days{grid-template-columns:1fr}}
+
+    .day{background:var(--card);padding:12px;border-radius:12px;box-shadow:0 6px 24px rgba(2,6,23,0.6);min-height:160px}
+    .day h3{display:flex;justify-content:space-between;align-items:center;margin:0 0 8px 0;font-size:15px}
+    .day .list{display:flex;flex-direction:column;gap:8px}
+    .task{background:var(--glass);padding:10px;border-radius:10px;color:#dff6fb;font-size:14px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+    .task .meta{font-size:12px;color:var(--muted)}
+    .controls{display:flex;gap:8px;margin-top:10px}
+
+    .sidebar{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:12px;border-radius:12px;box-shadow:0 6px 24px rgba(2,6,23,0.6);height:max-content}
+    .new{display:flex;gap:8px;flex-direction:column}
+    input, textarea, select, button{font-family:inherit}
+    input, textarea, select{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px;border-radius:8px;color:inherit}
+    textarea{min-height:80px;resize:vertical}
+    button{background:var(--accent);border:none;padding:8px 10px;border-radius:10px;color:#042026;font-weight:600;cursor:pointer}
+    button.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted);font-weight:500}
+    .small{font-size:13px;padding:6px 8px;border-radius:8px}
+
+    footer{margin-top:18px;text-align:center;color:var(--muted);font-size:13px}
+    .topbar{display:flex;gap:8px;align-items:center}
+    .day-count{background:rgba(255,255,255,0.03);padding:6px 10px;border-radius:999px;font-weight:600;color:#dff6fb}
+
+    /* nice micro-interactions */
+    .task:hover{transform:translateY(-3px);transition:transform .12s}
+    .hidden{display:none}
+    .muted{color:var(--muted)}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="logo">ATAL<br>9/E</div>
+      <div>
+        <h1>ATAL 9/E - Haftalık Ödev Panosu</h1>
+        <p class="lead">Haftanın 5 günü için hızlıca ödev ekleyin, düzenleyin ve sınıf arkadaşlarınızla paylaşın. (Veriler tarayıcıya kaydedilir)</p>
+      </div>
+    </header>
+
+    <main class="board">
+      <section>
+        <div class="topbar">
+          <div class="day-count" id="weekLabel">Pazartesi → Cuma</div>
+          <div style="flex:1"></div>
+          <button id="exportBtn" class="small ghost">Yedeği İndir</button>
+          <button id="importBtn" class="small ghost">Yükle</button>
+          <input id="fileIn" type="file" accept="application/json" class="hidden" />
+        </div>
+
+        <div style="height:14px"></div>
+
+        <div class="days" id="daysGrid">
+          <!-- JavaScript ile doldurulacak -->
+        </div>
+      </section>
+
+      <aside class="sidebar">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <strong>Yeni Ödev Ekle</strong>
+          <span class="muted" id="savedNote">Kaydedildi</span>
+        </div>
+        <div class="new">
+          <label>Gün</label>
+          <select id="daySelect">
+            <option value="0">Pazartesi</option>
+            <option value="1">Salı</option>
+            <option value="2">Çarşamba</option>
+            <option value="3">Perşembe</option>
+            <option value="4">Cuma</option>
+          </select>
+          <label>Konu / Ders</label>
+          <input id="subject" placeholder="Matematik, Türkçe..." />
+          <label>Açıklama</label>
+          <textarea id="desc" placeholder="Kısa açıklama veya sayfa numarası"></textarea>
+          <div style="display:flex;gap:8px">
+            <button id="addBtn">Ekle</button>
+            <button id="clearBtn" class="ghost">Hepsini Temizle</button>
+          </div>
+
+          <hr style="margin:12px 0;border:none;border-top:1px solid rgba(255,255,255,0.03)">
+
+          <div class="muted" style="font-size:13px">Paylaşmak için yedek (JSON) indirin ve arkadaşlarınıza gönderin.</div>
+        </div>
+      </aside>
+    </main>
+
+    <footer>Hazırlandı — ATAL 9/E Panosu • Kaydedilen veriler sadece sizin tarayıcınızda saklanır.</footer>
+  </div>
+
+  <script>
+    const DAYS = ['Pazartesi','Salı','Çarşamba','Perşembe','Cuma'];
+    const STORAGE_KEY = 'atal_9e_homework_v1';
+
+    // state
+    let state = { lists: [[],[],[],[],[]] };
+
+    // load
+    function load(){
+      try{
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if(raw){ state = JSON.parse(raw); }
+      }catch(e){ console.warn('load err', e) }
+    }
+    function save(){
+      try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); document.getElementById('savedNote').textContent='Kaydedildi'; setTimeout(()=>document.getElementById('savedNote').textContent='',900)}catch(e){console.warn(e)}
+    }
+
+    // render
+    function render(){
+      const grid = document.getElementById('daysGrid'); grid.innerHTML='';
+      DAYS.forEach((d, i)=>{
+        const col = document.createElement('div'); col.className='day';
+        const h = document.createElement('h3');
+        h.innerHTML = `<span>${d}</span><span class="muted">${state.lists[i].length} ödev</span>`;
+        col.appendChild(h);
+        const list = document.createElement('div'); list.className='list';
+        state.lists[i].forEach((task, idx)=>{
+          const t = document.createElement('div'); t.className='task';
+          t.innerHTML = `<div><strong>${escapeHtml(task.subject || '—')}</strong><div class="meta">${escapeHtml(task.desc || '')}</div></div>
+                         <div style="display:flex;flex-direction:column;gap:6px"><button class="small ghost" data-day="${i}" data-idx="${idx}" onclick="editTask(event)">Düzenle</button><button class="small" data-day="${i}" data-idx="${idx}" onclick="removeTask(event)">Sil</button></div>`;
+          list.appendChild(t);
+        })
+        col.appendChild(list);
+        grid.appendChild(col);
+      })
+    }
+
+    function escapeHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }
+
+    function addTask(){
+      const day = Number(document.getElementById('daySelect').value);
+      const subject = document.getElementById('subject').value.trim();
+      const desc = document.getElementById('desc').value.trim();
+      if(!subject && !desc){ alert('En az bir başlık veya açıklama girin.'); return }
+      state.lists[day].push({ subject, desc });
+      document.getElementById('subject').value=''; document.getElementById('desc').value='';
+      save(); render();
+    }
+
+    function removeTask(e){
+      const day = Number(e.target.dataset.day); const idx = Number(e.target.dataset.idx);
+      if(!confirm('Bu ödevi silmek istediğine emin misin?')) return;
+      state.lists[day].splice(idx,1); save(); render();
+    }
+
+    function editTask(e){
+      const day = Number(e.target.dataset.day); const idx = Number(e.target.dataset.idx);
+      const t = state.lists[day][idx];
+      const newSubject = prompt('Konu / Ders', t.subject || '') || '';
+      const newDesc = prompt('Açıklama', t.desc || '') || '';
+      state.lists[day][idx] = { subject:newSubject.trim(), desc:newDesc.trim() };
+      save(); render();
+    }
+
+    function clearAll(){
+      if(!confirm('Tüm ödevleri silmek istiyor musun?')) return;
+      state = { lists: [[],[],[],[],[]] }; save(); render();
+    }
+
+    // export / import
+    function exportJSON(){
+      const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = 'atal_9e_homework_backup.json'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    }
+    function importJSON(file){
+      const reader = new FileReader();
+      reader.onload = ()=>{
+        try{ const parsed = JSON.parse(reader.result); if(parsed && Array.isArray(parsed.lists)) { state = parsed; save(); render(); alert('Yedek yüklendi.'); } else alert('Geçersiz dosya.'); }catch(e){alert('Dosya okunamadı.')}
+      }
+      reader.readAsText(file);
+    }
+
+    // init
+    document.getElementById && (function(){
+      load(); render();
+      document.getElementById('addBtn').addEventListener('click', addTask);
+      document.getElementById('clearBtn').addEventListener('click', clearAll);
+      document.getElementById('exportBtn').addEventListener('click', exportJSON);
+      document.getElementById('importBtn').addEventListener('click', ()=>document.getElementById('fileIn').click());
+      document.getElementById('fileIn').addEventListener('change', (ev)=>{ if(ev.target.files && ev.target.files[0]) importJSON(ev.target.files[0]); ev.target.value=''; });
+
+      // keyboard: Ctrl+S to save snapshot
+      window.addEventListener('keydown', (e)=>{ if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='s'){ e.preventDefault(); exportJSON(); } })
+    })();
+  </script>
+</body>
+</html>
